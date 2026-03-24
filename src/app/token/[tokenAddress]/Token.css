@@ -1,0 +1,184 @@
+/* BuyPage Responsive Styles */
+
+.buy-page-container {
+  background: #000;
+  min-height: 100vh;
+  padding-top: 70px;
+}
+
+.buy-page-content {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 40px 20px;
+}
+
+
+.buy-page-info-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 20px;
+  margin-bottom: 40px;
+}
+
+.buy-page-info-card {
+  background: #111;
+  border: 1px solid #333;
+  border-radius: 12px;
+  padding: 15px;
+}
+
+.buy-page-info-label {
+  color: #999;
+  font-size: 12px;
+  margin-bottom: 5px;
+}
+
+.buy-page-info-value {
+  color: #fff;
+  font-size: 18px;
+  font-weight: bold;
+}
+
+.buy-page-progress-section {
+  margin-bottom: 20px;
+}
+
+.buy-page-progress-header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.buy-page-progress-label {
+  color: #999;
+  font-size: 14px;
+}
+
+.buy-page-progress-value {
+  color: #fff;
+  font-size: 14px;
+  font-weight: bold;
+}
+
+.buy-page-progress-bar-container {
+  width: 100%;
+  height: 8px;
+  background: #222;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.buy-page-progress-bar {
+  height: 100%;
+  background: linear-gradient(90deg, #9333EA 0%, #EC4899 100%);
+  transition: width 0.3s;
+}
+
+.buy-page-tabs {
+  display: flex;
+  gap: 20px;
+  border-bottom: 1px solid #333;
+  margin-bottom: 20px;
+}
+
+.buy-page-tab {
+  padding: 12px 0;
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  color: #fff;
+  font-size: 16px;
+  font-weight: normal;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.buy-page-tab.active {
+  border-bottom-color: #4CAF50;
+  font-weight: bold;
+}
+
+@media (max-width: 768px) {
+  .buy-page-container {
+    padding-top: 60px;
+  }
+
+  .buy-page-content {
+    padding: 20px 16px;
+  }
+
+  .buy-page-info-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+    margin-bottom: 24px;
+  }
+
+  .buy-page-info-card {
+    padding: 12px;
+  }
+
+  .buy-page-info-label {
+    font-size: 11px;
+  }
+
+  .buy-page-info-value {
+    font-size: 16px;
+  }
+
+  .buy-page-progress-section {
+    margin-bottom: 16px;
+  }
+
+  .buy-page-progress-label,
+  .buy-page-progress-value {
+    font-size: 12px;
+  }
+
+  .buy-page-tabs {
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+
+  .buy-page-tab {
+    padding: 10px 0;
+    font-size: 14px;
+  }
+}
+
+@media (max-width: 480px) {
+  .buy-page-container {
+    padding-top: 56px;
+  }
+
+  .buy-page-content {
+    padding: 16px 12px;
+  }
+
+  .buy-page-info-grid {
+    gap: 10px;
+    margin-bottom: 20px;
+  }
+
+  .buy-page-info-card {
+    padding: 10px;
+  }
+
+  .buy-page-info-value {
+    font-size: 14px;
+  }
+
+  .buy-page-progress-label,
+  .buy-page-progress-value {
+    font-size: 11px;
+  }
+
+  .buy-page-tabs {
+    gap: 8px;
+    margin-bottom: 12px;
+  }
+
+  .buy-page-tab {
+    padding: 8px 0;
+    font-size: 13px;
+  }
+}

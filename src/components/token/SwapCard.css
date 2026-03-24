@@ -1,0 +1,108 @@
+/* SwapCard Responsive Styles */
+
+@media (max-width: 768px) {
+  .swap-card-container {
+    padding: 20px !important;
+  }
+
+  .swap-card-tabs {
+    gap: 8px !important;
+    margin-bottom: 16px !important;
+  }
+
+  .swap-card-tab {
+    padding: 10px !important;
+    font-size: 14px !important;
+  }
+
+  .swap-card-balance-section {
+    margin-bottom: 16px !important;
+  }
+
+  .swap-card-balance-label {
+    font-size: 12px !important;
+  }
+
+  .swap-card-input-container {
+    padding: 16px !important;
+  }
+
+  .swap-card-input-wrapper {
+    gap: 8px !important;
+  }
+
+  .swap-card-input {
+    font-size: 20px !important;
+  }
+
+  .swap-card-token-symbol {
+    font-size: 18px !important;
+  }
+
+  .swap-card-token-logo {
+    width: 24px !important;
+    height: 24px !important;
+  }
+
+  .swap-card-percentage-buttons {
+    gap: 4px !important;
+    flex-wrap: wrap !important;
+  }
+
+  .swap-card-percentage-button {
+    padding: 5px 8px !important;
+    font-size: 10px !important;
+  }
+
+  .swap-card-submit-button {
+    padding: 12px !important;
+    font-size: 16px !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .swap-card-container {
+    padding: 16px !important;
+  }
+
+  .swap-card-tabs {
+    gap: 6px !important;
+    margin-bottom: 12px !important;
+  }
+
+  .swap-card-tab {
+    padding: 8px 12px !important;
+    font-size: 13px !important;
+  }
+
+  .swap-card-balance-section {
+    margin-bottom: 12px !important;
+  }
+
+  .swap-card-input-container {
+    padding: 12px !important;
+  }
+
+  .swap-card-input {
+    font-size: 18px !important;
+  }
+
+  .swap-card-token-symbol {
+    font-size: 16px !important;
+  }
+
+  .swap-card-token-logo {
+    width: 20px !important;
+    height: 20px !important;
+  }
+
+  .swap-card-percentage-button {
+    padding: 4px 6px !important;
+    font-size: 9px !important;
+  }
+
+  .swap-card-submit-button {
+    padding: 10px !important;
+    font-size: 15px !important;
+  }
+}

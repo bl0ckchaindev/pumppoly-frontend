@@ -1,0 +1,135 @@
+/* LaunchpadCard Responsive Styles */
+
+@media (max-width: 768px) {
+  .launchpad-card {
+    height: 92px !important;
+    gap: 6px !important;
+  }
+
+  .launchpad-card-logo {
+    width: 70px !important;
+  }
+
+  .launchpad-card-content {
+    padding: 6px !important;
+    gap: 4px !important;
+  }
+
+  .launchpad-card-symbol {
+    font-size: 13px !important;
+  }
+
+  .launchpad-card-name {
+    font-size: 11px !important;
+  }
+
+  .launchpad-card-mc-label {
+    font-size: 10px !important;
+  }
+
+  .launchpad-card-mc-value {
+    font-size: 11px !important;
+  }
+
+  .launchpad-card-24h-change {
+    font-size: 10px !important;
+  }
+
+  .launchpad-card-description {
+    font-size: 10px !important;
+  }
+
+  .launchpad-card-footer {
+    font-size: 10px !important;
+  }
+
+  .launchpad-card-badge {
+    top: 6px !important;
+    left: 6px !important;
+    padding: 3px 6px !important;
+    font-size: 9px !important;
+  }
+
+  .launchpad-card-social {
+    top: 6px !important;
+    right: 6px !important;
+    gap: 4px !important;
+  }
+
+  .launchpad-card-social-link {
+    width: 18px !important;
+    height: 18px !important;
+  }
+
+  .launchpad-card-social-link svg {
+    width: 10px !important;
+    height: 10px !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .launchpad-card {
+    height: 88px !important;
+    gap: 4px !important;
+  }
+
+  .launchpad-card-logo {
+    width: 60px !important;
+  }
+
+  .launchpad-card-content {
+    padding: 4px !important;
+    gap: 3px !important;
+  }
+
+  .launchpad-card-symbol {
+    font-size: 12px !important;
+  }
+
+  .launchpad-card-name {
+    font-size: 10px !important;
+  }
+
+  .launchpad-card-mc-label {
+    font-size: 9px !important;
+  }
+
+  .launchpad-card-mc-value {
+    font-size: 10px !important;
+  }
+
+  .launchpad-card-24h-change {
+    font-size: 9px !important;
+  }
+
+  .launchpad-card-description {
+    font-size: 9px !important;
+  }
+
+  .launchpad-card-footer {
+    font-size: 9px !important;
+  }
+
+  .launchpad-card-badge {
+    top: 4px !important;
+    left: 4px !important;
+    padding: 2px 4px !important;
+    font-size: 8px !important;
+  }
+
+  .launchpad-card-social {
+    top: 4px !important;
+    right: 4px !important;
+    gap: 3px !important;
+  }
+
+  .launchpad-card-social-link {
+    width: 16px !important;
+    height: 16px !important;
+  }
+
+  .launchpad-card-social-link svg {
+    width: 9px !important;
+    height: 9px !important;
+  }
+}

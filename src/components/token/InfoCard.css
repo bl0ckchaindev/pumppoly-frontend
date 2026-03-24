@@ -1,0 +1,84 @@
+.info-card-container {
+  background: #111;
+  border: 1px solid #9333EA;
+  border-radius: 12px;
+  padding: 12px;
+  box-shadow: 0 0 15px rgba(147, 51, 234, 0.4), 0 0 30px rgba(147, 51, 234, 0.2);
+  margin-top: 10px;
+}
+
+.info-card-main {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  flex-wrap: wrap;
+}
+
+.info-card-content-wrapper {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  flex: 1;
+  min-width: 0;
+}
+
+.info-card-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.info-card-fees {
+  flex-shrink: 0;
+  min-width: 200px;
+  padding: 12px;
+  background: #1a1a1a;
+  border-radius: 6px;
+  border: 1px solid rgba(147, 51, 234, 0.5);
+  box-shadow: 0 0 10px rgba(147, 51, 234, 0.3);
+}
+
+.info-card-description-section {
+  margin-top: 12px;
+  order: 3;
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+@media (min-width: 769px) {
+  .info-card-description-section {
+    flex-basis: 100%;
+    order: 3;
+    margin-left: 0;
+  }
+}
+
+@media (max-width: 768px) {
+  .info-card-main {
+    flex-direction: column;
+  }
+
+  .info-card-content-wrapper {
+    flex-direction: column;
+    width: 100%;
+    order: 2;
+  }
+
+  .info-card-content {
+    width: 100%;
+  }
+
+  .info-card-fees {
+    min-width: 100%;
+    width: 100%;
+    margin-top: 12px;
+    order: 4;
+  }
+
+  .info-card-description-section {
+    margin-top: 0px;
+    order: 3;
+  }
+}

@@ -1,0 +1,328 @@
+/* List View Row Styles - Extracted from List.css */
+.list-view-container {
+  background: #111;
+  border: 1px solid #333;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.list-view-header {
+  display: grid;
+  grid-template-columns: 60px 1fr 120px 100px 140px 120px;
+  gap: 16px;
+  padding: 16px 20px;
+  background: #1a1a1a;
+  border-bottom: 1px solid #333;
+  font-size: 12px;
+  font-weight: 600;
+  color: #999;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.list-view-body {
+  max-height: 800px;
+  overflow-y: auto;
+}
+
+.list-view-row {
+  display: grid;
+  grid-template-columns: 60px 1fr 120px 100px 140px 120px;
+  gap: 16px;
+  padding: 10px 15px;
+  border-bottom: 1px solid #222;
+  transition: all 0.2s;
+  cursor: pointer;
+}
+
+.list-view-row:hover {
+  background: rgba(147, 51, 234, 0.1);
+  border-bottom-color: #9333EA;
+}
+
+.list-view-cell {
+  display: flex;
+  align-items: center;
+  color: #fff;
+  font-size: 14px;
+}
+
+.list-view-logo {
+  justify-content: center;
+}
+
+.list-view-logo-img {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.list-view-logo-placeholder {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: #9333EA;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-weight: bold;
+  font-size: 16px;
+}
+
+.list-view-card .list-view-logo-img,
+.list-view-card .list-view-logo-placeholder {
+  width: 48px;
+  height: 48px;
+  font-size: 18px;
+}
+
+.list-view-name {
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+}
+
+.list-view-token-name {
+  font-weight: 600;
+  color: #fff;
+  font-size: 14px;
+}
+
+.list-view-token-symbol {
+  color: #999;
+  font-size: 12px;
+}
+
+.listed-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  background: #9333EA;
+  color: #fff;
+  font-size: 10px;
+  font-weight: 700;
+  border-radius: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  line-height: 1.2;
+}
+
+.list-view-price {
+  font-weight: 600;
+  color: #fff;
+}
+
+.list-view-change {
+  font-weight: 600;
+}
+
+.price-change {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.price-change.positive {
+  color: #18d78c;
+}
+
+.price-change.negative {
+  color: #f44336;
+}
+
+.list-view-marketcap {
+  font-weight: 500;
+  color: #ccc;
+}
+
+.list-view-volume {
+  font-weight: 500;
+  color: #ccc;
+}
+
+/* Mobile Card View */
+.list-view-card {
+  background: #1a1a1a;
+  border: 1px solid #333;
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 12px;
+  transition: all 0.2s;
+  cursor: pointer;
+}
+
+.list-view-card:hover {
+  background: rgba(147, 51, 234, 0.1);
+  border-color: #9333EA;
+}
+
+.list-view-card-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #333;
+}
+
+.list-view-card-logo {
+  flex-shrink: 0;
+}
+
+.list-view-card-name-section {
+  flex: 1;
+  min-width: 0;
+}
+
+.list-view-card-body {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.list-view-card-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.list-view-card-label {
+  font-size: 12px;
+  color: #999;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.list-view-card-value {
+  font-size: 14px;
+  color: #fff;
+  font-weight: 600;
+}
+
+/* Responsive Styles */
+@media (max-width: 1024px) {
+  .list-view-header,
+  .list-view-row {
+    grid-template-columns: 50px 1fr 100px 90px 120px 100px;
+    gap: 12px;
+  }
+
+  .list-view-logo-img,
+  .list-view-logo-placeholder {
+    width: 32px;
+    height: 32px;
+  }
+}
+
+@media (max-width: 768px) {
+  .list-view-container {
+    background: transparent;
+    border: none;
+    border-radius: 0;
+  }
+
+  .list-view-header {
+    display: none;
+  }
+
+  .list-view-body {
+    max-height: none;
+    overflow-y: visible;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .list-view-row {
+    display: none;
+  }
+
+  .list-view-card {
+    background: #1a1a1a;
+    border-radius: 0;
+    margin-bottom: 0;
+    border-left: 1px solid #333;
+    border-right: 1px solid #333;
+    border-top: 1px solid #333;
+    border-bottom: none;
+  }
+
+  .list-view-card:first-child {
+    border-top-left-radius: 12px;
+    border-top-right-radius: 12px;
+  }
+
+  .list-view-card:last-child {
+    border-bottom: 1px solid #333;
+    border-bottom-left-radius: 12px;
+    border-bottom-right-radius: 12px;
+  }
+
+  .list-view-card:not(:first-child) {
+    border-top: none;
+  }
+
+  .list-view-card {
+    padding: 12px;
+    margin-bottom: 10px;
+  }
+
+  .list-view-card-header {
+    margin-bottom: 12px;
+    padding-bottom: 10px;
+  }
+
+  .list-view-card-body {
+    gap: 10px;
+  }
+
+  .list-view-card-label {
+    font-size: 11px;
+  }
+
+  .list-view-card-value {
+    font-size: 13px;
+  }
+
+  .list-view-token-name {
+    font-size: 14px;
+  }
+
+  .list-view-token-symbol {
+    font-size: 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  .list-view-card {
+    padding: 12px;
+    margin-bottom: 10px;
+  }
+
+  .list-view-card-header {
+    margin-bottom: 12px;
+    padding-bottom: 10px;
+  }
+
+  .list-view-card-body {
+    gap: 10px;
+  }
+
+  .list-view-card-label {
+    font-size: 11px;
+  }
+
+  .list-view-card-value {
+    font-size: 13px;
+  }
+
+  .list-view-token-name {
+    font-size: 14px;
+  }
+
+  .list-view-token-symbol {
+    font-size: 12px;
+  }
+}

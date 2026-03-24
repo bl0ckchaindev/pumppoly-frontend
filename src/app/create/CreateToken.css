@@ -1,0 +1,428 @@
+/* CreateToken Page Styles - Purple/Pink Theme */
+
+.create-token-page {
+  min-height: 100vh;
+  background: transparent;
+  color: #fff;
+  padding-top: 70px;
+  position: relative;
+}
+
+.create-token-content {
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 40px 20px;
+}
+
+.create-token-back-button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #9333EA;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 16px;
+  color: #fff;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  margin-bottom: 30px;
+  transition: background 0.2s;
+}
+
+.create-token-back-button:hover {
+  background: #7C3AED;
+}
+
+.create-token-back-icon {
+  width: 16px;
+  height: 16px;
+  display: inline-block;
+}
+
+.create-token-title {
+  font-size: 28px;
+  font-weight: 600;
+  color: #fff;
+  margin-bottom: 30px;
+}
+
+.create-token-form {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.create-token-field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.create-token-label {
+  color: #999;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.create-token-label-required {
+  color: #999;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.create-token-label-required::after {
+  content: ' *';
+  color: #EC4899;
+}
+
+.create-token-input {
+  width: 100%;
+  padding: 14px 16px;
+  background: #111;
+  border: 1px solid #333;
+  border-radius: 8px;
+  color: #fff;
+  font-size: 16px;
+  font-family: inherit;
+  transition: border-color 0.2s;
+}
+
+.create-token-input:focus {
+  outline: none;
+  border-color: #9333EA;
+}
+
+.create-token-textarea {
+  width: 100%;
+  padding: 14px 16px;
+  background: #111;
+  border: 1px solid #333;
+  border-radius: 8px;
+  color: #fff;
+  font-size: 16px;
+  font-family: inherit;
+  resize: vertical;
+  min-height: 100px;
+  transition: border-color 0.2s;
+}
+
+.create-token-textarea:focus {
+  outline: none;
+  border-color: #9333EA;
+}
+
+.create-token-upload-area {
+  width: 100%;
+  padding: 40px;
+  background: #111;
+  border: 1px solid #333;
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  cursor: pointer;
+  transition: border-color 0.2s, background 0.2s;
+  position: relative;
+  min-height: 150px;
+}
+
+.create-token-upload-area:hover {
+  border-color: #9333EA;
+  background: #1a1a1a;
+}
+
+.create-token-upload-icon {
+  width: 32px;
+  height: 32px;
+  color: #9333EA;
+}
+
+.create-token-upload-text {
+  color: #999;
+  font-size: 14px;
+}
+
+.create-token-upload-preview {
+  max-width: 100%;
+  max-height: 200px;
+  border-radius: 8px;
+}
+
+.create-token-file-input {
+  display: none;
+}
+
+.create-token-info-text {
+  color: #666;
+  font-size: 12px;
+  margin-top: 4px;
+}
+
+.create-token-allocation-section {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px;
+  background: #111;
+  border: 1px solid #333;
+  border-radius: 8px;
+}
+
+.create-token-allocation-label {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.create-token-allocation-label-text {
+  color: #999;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.create-token-allocation-label-desc {
+  color: #666;
+  font-size: 12px;
+}
+
+.create-token-allocation-value {
+  color: #9333EA;
+  font-size: 24px;
+  font-weight: 600;
+}
+
+.create-token-social-section {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.create-token-social-input-wrapper + .create-token-social-input-wrapper {
+  margin-top: 0;
+}
+
+.create-token-social-input-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  background: #111;
+  border: 1px solid #333;
+  border-radius: 8px;
+  transition: border-color 0.2s;
+}
+
+.create-token-social-input-wrapper:focus-within {
+  border-color: #9333EA;
+}
+
+.create-token-social-icon {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+}
+
+.create-token-social-input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  color: #fff;
+  font-size: 16px;
+  font-family: inherit;
+  outline: none;
+}
+
+.create-token-social-input::placeholder {
+  color: #666;
+}
+
+.create-token-submit-button {
+  width: 100%;
+  padding: 16px;
+  background: linear-gradient(135deg, #9333EA 0%, #EC4899 100%);
+  border: none;
+  border-radius: 8px;
+  color: #fff;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.2s, transform 0.2s;
+  margin-top: 20px;
+}
+
+.create-token-submit-button:hover:not(:disabled) {
+  opacity: 0.9;
+  transform: translateY(-1px);
+}
+
+.create-token-submit-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.create-token-connect-wallet {
+  width: 100%;
+  padding: 16px;
+  background: #111;
+  border: 1px solid #333;
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  margin-top: 20px;
+}
+
+.create-token-connect-text {
+  color: #999;
+  font-size: 14px;
+}
+
+.create-token-error {
+  color: #EC4899;
+  font-size: 14px;
+  margin-top: 8px;
+}
+
+.create-token-cost-info {
+  color: #666;
+  font-size: 12px;
+  margin-top: 8px;
+  text-align: center;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .create-token-page {
+    padding-top: 60px;
+  }
+
+  .create-token-content {
+    padding: 16px;
+  }
+
+  .create-token-title {
+    font-size: 24px;
+    margin-bottom: 24px;
+  }
+
+  .create-token-form {
+    gap: 20px;
+  }
+
+  .create-token-field {
+    gap: 6px;
+  }
+
+  .create-token-label,
+  .create-token-label-required {
+    font-size: 13px;
+  }
+
+  .create-token-input,
+  .create-token-textarea {
+    padding: 12px 14px;
+    font-size: 15px;
+  }
+
+  .create-token-textarea {
+    min-height: 80px;
+  }
+
+  .create-token-upload-area {
+    padding: 30px 20px;
+    min-height: 120px;
+  }
+
+  .create-token-upload-icon {
+    width: 28px;
+    height: 28px;
+  }
+
+  .create-token-upload-text {
+    font-size: 13px;
+  }
+
+  .create-token-allocation-section {
+    padding: 12px;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .create-token-allocation-value {
+    font-size: 20px;
+  }
+
+  .create-token-social-input-wrapper {
+    padding: 12px 14px;
+  }
+
+  .create-token-social-icon {
+    width: 18px;
+    height: 18px;
+  }
+
+  .create-token-social-input {
+    font-size: 15px;
+  }
+
+  .create-token-submit-button {
+    padding: 14px;
+    font-size: 15px;
+  }
+}
+
+@media (max-width: 480px) {
+  .create-token-page {
+    padding-top: 56px;
+  }
+
+  .create-token-content {
+    padding: 12px;
+  }
+
+  .create-token-title {
+    font-size: 20px;
+    margin-bottom: 20px;
+  }
+
+  .create-token-form {
+    gap: 16px;
+  }
+
+  .create-token-input,
+  .create-token-textarea {
+    padding: 10px 12px;
+    font-size: 14px;
+  }
+
+  .create-token-upload-area {
+    padding: 24px 16px;
+    min-height: 100px;
+  }
+
+  .create-token-allocation-section {
+    padding: 10px;
+  }
+
+  .create-token-allocation-value {
+    font-size: 18px;
+  }
+
+  .create-token-social-input-wrapper {
+    padding: 10px 12px;
+  }
+
+  .create-token-social-input {
+    font-size: 14px;
+  }
+
+  .create-token-submit-button {
+    padding: 12px;
+    font-size: 14px;
+  }
+}
