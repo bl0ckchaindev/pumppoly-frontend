@@ -1,28 +1,47 @@
-// Path: next.config.js
+const path = require('path')
+
+// Packages that some wallet SDKs transitively import but aren't installed / aren't needed client-side.
+// IMPORTANT: never push scoped package names (e.g. @scope/pkg) as plain strings to config.externals —
+// webpack uses them as JS global variable names, and @ / / produce an invalid-identifier SyntaxError
+// in the browser bundle. Use resolve.alias → empty stub on the client instead.
+const OPTIONAL_PACKAGES = [
+  'pino-pretty',
+  'lokijs',
+  'encoding',
+  '@react-native-async-storage/async-storage',
+]
+
 const nextConfig = {
   distDir: 'dist',
   output: 'export',
-  webpack: (config, { isServer, webpack }) => {
-    // Handle optional peer dependencies (required for Reown AppKit)
-    config.externals = config.externals || []
-    if (Array.isArray(config.externals)) {
-      config.externals.push(
-        'pino-pretty',
-        'lokijs',
-        'encoding',
+  poweredByHeader: false,
+  reactStrictMode: true,
+  compiler: {
+    // Strip console.log/debug/info in production; keep warn/error for observability
+    removeConsole: process.env.NODE_ENV === 'production' ? { exclude: ['error', 'warn'] } : false,
+  },
+  webpack: (config, { isServer }) => {
+    if (isServer) {
+      // Server: CommonJS require() is valid for any string, including scoped packages
+      config.externals = [
+        ...(Array.isArray(config.externals) ? config.externals : []),
+        ...OPTIONAL_PACKAGES,
         'porto',
         'porto/internal',
-        '@react-native-async-storage/async-storage'
-        // Note: @coinbase/wallet-sdk and @gemini-wallet/core are now installed
-        // and should be available for use with their respective connectors
-      )
+      ]
+    } else {
+      // Client: alias missing optional packages to an empty stub module.
+      // String externals for scoped packages generate invalid JS identifiers in the browser bundle.
+      const emptyModule = path.resolve(__dirname, 'src/lib/empty-module.js')
+      config.resolve.alias = {
+        ...config.resolve.alias,
+        ...Object.fromEntries(OPTIONAL_PACKAGES.map(pkg => [pkg, emptyModule])),
+      }
     }
 
     return config
   },
-    // Or if you want to be more permissive during development:
-    allowedDevOrigins: process.env.NODE_ENV === 'development' ? undefined : ['pumppoly.com']
-
+  allowedDevOrigins: process.env.NODE_ENV === 'development' ? undefined : ['pumppoly.com'],
 }
 
 module.exports = nextConfig

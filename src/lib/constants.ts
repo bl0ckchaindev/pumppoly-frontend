@@ -1,12 +1,4 @@
-import { createPublicClient, http } from 'viem'
-import { base } from 'viem/chains'
 import Web3 from 'web3'
-
-export const publicClient = createPublicClient({
-    chain: base,
-    transport: http()
-})
-
 
 // Support both REACT_APP_ and NEXT_PUBLIC_ for migration compatibility
 const getEnvVar = (key: string, defaultValue: string) => {
@@ -14,16 +6,26 @@ const getEnvVar = (key: string, defaultValue: string) => {
 }
 
 const PROVIDER_URL_BASE = getEnvVar('BASE_RPC_URL', 'https://mainnet.base.org')
-// Use Infura as fallback for Sepolia (more reliable than publicnode)
 const PROVIDER_URL_SEPOLIA = getEnvVar('SEPOLIA_RPC_URL', 'https://ethereum-sepolia-rpc.publicnode.com')
 
-export const baseWeb3Client = new Web3(new Web3.providers.HttpProvider(PROVIDER_URL_BASE))
-export const web3ClientSepolia = new Web3(new Web3.providers.HttpProvider(PROVIDER_URL_SEPOLIA))
-
-export const web3Clients = {
-    8453: baseWeb3Client,
-    11155111: web3ClientSepolia
+const PROVIDER_URLS: Record<number, string> = {
+  8453: PROVIDER_URL_BASE,
+  11155111: PROVIDER_URL_SEPOLIA,
 }
+
+// Lazy: Web3 clients are created on first access per chain, not at module load time.
+// Creating them eagerly establishes two HTTP connections before the page renders.
+const _web3Cache: Record<number, Web3> = {}
+export const web3Clients: Record<number, Web3> = new Proxy(_web3Cache, {
+  get(cache, prop) {
+    const chainId = Number(prop)
+    if (!cache[chainId] && PROVIDER_URLS[chainId]) {
+      cache[chainId] = new Web3(new Web3.providers.HttpProvider(PROVIDER_URLS[chainId]))
+    }
+    return cache[chainId]
+  }
+})
+
 
 export const imageUrl = getEnvVar('IMAGE_URL', 'https://api.trollspump.fun/uploads/')
 

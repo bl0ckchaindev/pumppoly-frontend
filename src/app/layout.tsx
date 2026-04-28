@@ -1,6 +1,21 @@
 import type { Metadata } from 'next'
+import { Bricolage_Grotesque, Dela_Gothic_One } from 'next/font/google'
 import Providers from './providers'
 import './globals.css'
+
+const bricolage = Bricolage_Grotesque({
+  subsets: ['latin'],
+  weight: ['200', '300', '400', '500', '600', '700', '800'],
+  variable: '--font-bricolage',
+  display: 'swap',
+})
+
+const delaGothic = Dela_Gothic_One({
+  subsets: ['latin'],
+  weight: '400',
+  variable: '--font-dela-gothic',
+  display: 'swap',
+})
 
 export const metadata: Metadata = {
   title: 'PumpPoly | Base Network Meme Coin Launchpad',
@@ -16,12 +31,11 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="en">
-      <head>
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,200..800&family=Dela+Gothic+One&display=swap" rel="stylesheet" />
-      </head>
+    <html
+      lang="en"
+      className={`${bricolage.variable} ${delaGothic.variable}`}
+      suppressHydrationWarning
+    >
       <body>
         <Providers cookies={null}>{children}</Providers>
       </body>

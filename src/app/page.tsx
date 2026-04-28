@@ -9,11 +9,26 @@ import { getEvmPublicClient } from '../lib/evmRpcClients'
 import { getAddress, formatUnits } from 'viem'
 import { Connection, PublicKey } from '@solana/web3.js'
 import { getAssociatedTokenAddressSync } from '@solana/spl-token'
-import { imageUploadUrl, SOLANA_RPC_URL, web3Clients, bondingLimits, SOLANA_BONDING_LIMIT_SOL } from '../lib/constants'
+import { imageUploadUrl, SOLANA_RPC_URL, bondingLimits, SOLANA_BONDING_LIMIT_SOL, useSupabase, supportedChainIds } from '../lib/constants'
 import Footer from '../components/common/Footer'
 import TopBar from '../components/common/TopBar'
 import InfoCard from '../components/token/InfoCard.jsx'
 import Link from 'next/link'
+import { useAllTokens } from '../lib/hooks/useAllTokens'
+import { useEthPrice } from '../lib/hooks/useEthPrice'
+import { useSolPrice } from '../lib/hooks/useSolPrice'
+import { useChain } from '../lib/context/ChainContext'
+import { formatMarketCap } from '../lib/formatting'
+import { isSolanaChain, isEvmCompatibleChain, defaultEvmChainSlug } from '../lib/chainUtils'
+import LoadingSpinner from '../components/common/LoadingSpinner'
+import { fetchTokenPriceData, subscribeToPriceUpdates, fetchBondingCurve, supabase } from '../lib/supabase'
+import { config } from '../lib/config.jsx'
+import TokenAbi from '../lib/abis/TokenABI.json'
+import ChadAbi from '../lib/abis/BondingCurveABI.json'
+import { fetchBondingLimitFromContract } from '../lib/bondingConfig'
+import { getCachedBondingCurve, setCachedBondingCurve, invalidateBondingCurve } from '../lib/solana/cache'
+import { calculateMarketCap, calculateVolumeUSD, calculateTokenPriceUSD, calculateSolanaMarketCap, calculateSolanaVolumeUSD, calculateSolanaTokenPriceUSD } from '../lib/tokenCalculations'
+import { SolanaProgram } from '../lib/solana/program'
 
 const ChartPlaceholder = () => (
   <div className="min-h-[280px] flex items-center justify-center bg-[#111] rounded-xl">
@@ -37,26 +52,6 @@ const SwapCard = dynamic(
   () => import('../components/token/SwapCard.jsx'),
   { loading: () => <div className="min-h-[180px] flex items-center justify-center"><div className="w-6 h-6 border-2 border-purple-primary/50 border-t-purple-primary rounded-full animate-spin" /></div>, ssr: false }
 )
-import { useAllTokens } from '../lib/hooks/useAllTokens'
-import { useEthPrice } from '../lib/hooks/useEthPrice'
-import { useSolPrice } from '../lib/hooks/useSolPrice'
-import { useChain } from '../lib/context/ChainContext'
-import { formatMarketCap } from '../lib/formatting'
-import { isSolanaChain, isEvmCompatibleChain, defaultEvmChainSlug } from '../lib/chainUtils'
-import LoadingSpinner from '../components/common/LoadingSpinner'
-import { fetchTokenPriceData, subscribeToPriceUpdates, fetchBondingCurve } from '../lib/supabase'
-import { supabase } from '../lib/supabase'
-import { config } from '../lib/config.jsx'
-import TokenAbi from '../lib/abis/TokenABI.json'
-import ChadAbi from '../lib/abis/BondingCurveABI.json'
-import { fetchBondingLimitFromContract } from '../lib/bondingConfig'
-import { getCachedBondingCurve, setCachedBondingCurve, invalidateBondingCurve } from '../lib/solana/cache'
-import { calculateMarketCap, calculateVolumeUSD, calculateTokenPriceUSD, calculateSolanaMarketCap, calculateSolanaVolumeUSD, calculateSolanaTokenPriceUSD } from '../lib/tokenCalculations'
-// CSS converted to Tailwind
-// import './List.css'
-
-import { useSupabase } from '../lib/constants'
-import { SolanaProgram } from '../lib/solana/program'
 
 /** Chain-derived bonding curve data for current token (same source as token page / SwapCard) */
 type CurrentTokenBondingFromChain = {
@@ -250,7 +245,7 @@ const Home = () => {
       // Handle EVM tokens: use connected chain so we read from the wallet's network (balance shows in buy/sell modal)
       else if (isEvmCompatibleChain(currentToken?.chain) && currentToken?.tokenAddress && address && isConnected) {
         const effectiveChainId = Number(connectedChainId) || currentToken.chainId
-        if (effectiveChainId && web3Clients[effectiveChainId]) {
+        if (effectiveChainId && supportedChainIds.includes(effectiveChainId)) {
           try {
             const client = getEvmPublicClient(effectiveChainId)
             const tokenBal = await readContract(client, {
@@ -259,9 +254,7 @@ const Home = () => {
               functionName: 'balanceOf',
               args: [address],
             })
-            console.log('[god-log] tokenBal', tokenBal)
-            setTokenBalance(parseFloat(web3Clients[effectiveChainId].utils.fromWei(String(tokenBal), 'ether')))
-            console.log('[god-log] tokenBalance', tokenBalance)
+            setTokenBalance(parseFloat(formatUnits(tokenBal as bigint, 18)))
           } catch (error) {
             console.error('Error fetching token balance:', error)
             setTokenBalance(0)
@@ -285,7 +278,7 @@ const Home = () => {
       }
       if (currentToken?.tokenAddress && currentToken?.bondingCurveAddress && address && isConnected) {
         const effectiveChainId = Number(connectedChainId) || currentToken.chainId
-        if (effectiveChainId && web3Clients[effectiveChainId]) {
+        if (effectiveChainId && supportedChainIds.includes(effectiveChainId)) {
           try {
             const client = getEvmPublicClient(effectiveChainId)
             const approveAddress = getAddress(currentToken.bondingCurveAddress)
@@ -295,7 +288,7 @@ const Home = () => {
               functionName: 'allowance',
               args: [address, approveAddress],
             })
-            setTokenAllowance(parseFloat(web3Clients[effectiveChainId].utils.fromWei(String(allowance), 'ether')))
+            setTokenAllowance(parseFloat(formatUnits(allowance as bigint, 18)))
           } catch (error) {
             console.error('Error fetching token allowance:', error)
             setTokenAllowance(0)

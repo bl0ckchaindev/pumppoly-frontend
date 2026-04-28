@@ -55,18 +55,6 @@ export const supabase = createClient(supabaseUrl || 'https://placeholder.supabas
   }
 })
 
-// Test connection on client side (silently, don't spam console)
-if (typeof window !== 'undefined' && supabaseUrl && supabaseAnonKey) {
-  // Test connection (fire and forget, only log on error)
-  Promise.resolve(
-    supabase.from('tokens').select('count', { count: 'exact', head: true })
-  ).catch((error: any) => {
-    // Only log if it's a real error (not just network timeout/refused)
-    if (error?.code !== 'PGRST301' && !error?.message?.includes('Failed to fetch')) {
-      console.warn('⚠️ Supabase connection test failed:', error?.message || error)
-    }
-  })
-}
 
 // Types for database tables
 export interface ChatMessage {
