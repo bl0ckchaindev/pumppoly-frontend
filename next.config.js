@@ -1,5 +1,7 @@
 // Path: next.config.js
 const nextConfig = {
+  distDir: 'dist',
+  output: 'export',
   webpack: (config, { isServer, webpack }) => {
     // Handle optional peer dependencies (required for Reown AppKit)
     config.externals = config.externals || []
@@ -16,14 +18,11 @@ const nextConfig = {
       )
     }
 
-    config.resolve.alias = {
-      ...config.resolve.alias,
-      'bigint': require.resolve('bigint/crypto/js'),
-    }
-
     return config
   },
     // Or if you want to be more permissive during development:
-    allowedDevOrigins: process.env.NODE_ENV === 'development' ? undefined : ['trollspump.com']
+    allowedDevOrigins: process.env.NODE_ENV === 'development' ? undefined : ['pumppoly.com']
 
 }
+
+module.exports = nextConfig

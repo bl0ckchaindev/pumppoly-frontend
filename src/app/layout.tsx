@@ -1,5 +1,4 @@
 import type { Metadata } from 'next'
-import { headers } from 'next/headers'
 import Providers from './providers'
 import './globals.css'
 
@@ -11,14 +10,11 @@ export const metadata: Metadata = {
   },
 }
 
-export default async function RootLayout({
+export default function RootLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
-  const headersObj = await headers()
-  const cookies = headersObj.get('cookie')
-
   return (
     <html lang="en">
       <head>
@@ -27,7 +23,7 @@ export default async function RootLayout({
         <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,200..800&family=Dela+Gothic+One&display=swap" rel="stylesheet" />
       </head>
       <body>
-        <Providers cookies={cookies}>{children}</Providers>
+        <Providers cookies={null}>{children}</Providers>
       </body>
     </html>
   )

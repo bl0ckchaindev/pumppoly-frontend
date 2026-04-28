@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(node -e \"const m = require\\('wagmi/actions'\\); console.log\\(Object.keys\\(m\\).filter\\(k => k.includes\\('read'\\) || k.includes\\('Read'\\)\\)\\)\")"
+    ],
+    "additionalDirectories": [
+      "e:\\Project\\2026-04\\PumpPoly\\frontend\\src\\app\\token\\[tokenAddress]"
+    ]
+  }
+}

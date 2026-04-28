@@ -2,7 +2,7 @@
 
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import { useAccount, useWriteContract, useWaitForTransactionReceipt } from 'wagmi'
-import { readContract } from 'viem/actions'
+import { readContract } from 'wagmi/actions'
 import { getAddress } from 'viem'
 import { useWallet } from '@solana/wallet-adapter-react'
 import { Program, AnchorProvider } from '@coral-xyz/anchor'
@@ -123,7 +123,7 @@ export default function LiquidityLockCard({
         abi: FactoryUpgradeableABI,
         functionName: 'devWallet',
         chainId: effectiveChainId
-      }) as Promise<`0x${string}`>
+      }) as `0x${string}`
       setLockDurationSec(dur)
       setUnlockTimeSec(unlock)
       setWithdrawn(Boolean(wd))
@@ -151,7 +151,7 @@ export default function LiquidityLockCard({
       const conn = new Connection(SOLANA_RPC_URL, 'confirmed')
       const idl = (await import('../../lib/solana/fomo.json')).default
       const provider = new AnchorProvider(conn, readOnlyAnchorWallet as any, { commitment: 'confirmed' })
-      const program = new Program(idl as any, programId, provider)
+      const program = new Program(idl as any, provider) as any
       const bc: any = await program.account.bondingCurve.fetch(bondingCurvePda)
       setSolCreator(bc.owner?.toBase58?.() || null)
       setSolComplete(Boolean(bc.complete))
@@ -256,7 +256,7 @@ export default function LiquidityLockCard({
         signAllTransactions: async (txs: Transaction[]) => Promise.all(txs.map((t) => signTransaction!(t)))
       }
       const provider = new AnchorProvider(conn, walletWrapper as any, { commitment: 'confirmed' })
-      const program = new Program(idl as any, programId, provider)
+      const program = new Program(idl as any, provider) as any
 
       const tx = await program.methods
         .unlockLp()
