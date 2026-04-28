@@ -92,6 +92,8 @@ const CreateToken = () => {
   const [twitter, setTwitter] = useState('')
   const [telegram, setTelegram] = useState('')
   const [depositAmount, setDepositAmount] = useState('')
+  /** LP lock duration in days (minimum 30); stored on-chain as seconds */
+  const [liquidityLockDays, setLiquidityLockDays] = useState(45)
   const [accountBalance, setAccountBalance] = useState(0)
   const [solanaBalance, setSolanaBalance] = useState(0)
   const [logoFile, setLogoFile] = useState<File | null>(null)
@@ -344,7 +346,8 @@ const CreateToken = () => {
           name: tokenName,
           symbol: tokenSymbol,
           uri: logoUrl || '',
-          openTime: new BN(Math.floor(Date.now() / 1000))
+          openTime: new BN(Math.floor(Date.now() / 1000)),
+          liquidityLockSecs: new BN(Math.floor(liquidityLockDays * 86400))
         })
         .accounts({
           creator: solanaPublicKey,
@@ -457,10 +460,11 @@ const CreateToken = () => {
       const factoryAddress = getFactoryAddress(chainId)
 
       // Encode function data
+      const lockSeconds = BigInt(Math.floor(liquidityLockDays * 86400))
       const data = encodeFunctionData({
         abi: DogDefiFactoryAbi,
         functionName: 'createToken',
-        args: [[tokenName, tokenSymbol, tokenDescription, website, twitter, telegram, '']]
+        args: [[tokenName, tokenSymbol, tokenDescription, website, twitter, telegram, ''], lockSeconds]
       })
 
       // Use sendTransaction with explicit gas limit to avoid EIP-3860 cap
@@ -645,6 +649,25 @@ const CreateToken = () => {
                 </>
               )}
             </div>
+          </div>
+
+          {/* LP lock (minimum 30 days) */}
+          <div className="create-token-field">
+            <label className="create-token-label">LP lock after migration (days)</label>
+            <input
+              type="number"
+              min={30}
+              step={1}
+              value={liquidityLockDays}
+              onChange={(e) => {
+                const v = Number(e.target.value)
+                if (Number.isFinite(v)) setLiquidityLockDays(Math.max(30, Math.floor(v)))
+              }}
+              className="create-token-input"
+            />
+            <span className="create-token-info-text" style={{ display: 'block', marginTop: 6 }}>
+              Minimum lock is 30 days; there is no maximum. After this period, the platform dev can withdraw EVM LP or receive Raydium LP on Solana.
+            </span>
           </div>
 
           {/* Initial Buy Field */}

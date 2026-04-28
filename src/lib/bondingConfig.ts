@@ -8,6 +8,7 @@ import { getEvmPublicClient } from './evmRpcClients'
 import { getFactoryAddress } from './addressHelpers'
 import FactoryAbi from './abis/FactoryUpgradeableABI.json'
 import { bondingLimits, SOLANA_BONDING_LIMIT_SOL } from './constants'
+import { isSolanaChain } from './chainUtils'
 import { Keypair } from '@solana/web3.js'
 import { SolanaProgram } from './solana/program'
 import { getCachedGlobalConfig, setCachedGlobalConfig } from './solana/cache'
@@ -98,10 +99,10 @@ export async function fetchSolanaBondingThreshold(): Promise<number> {
  * Fetch bonding limit for the given chain. Returns value in native units (ETH or SOL).
  */
 export async function fetchBondingLimitFromContract(
-  chain: 'evm' | 'solana',
+  chain: string,
   chainId?: number
 ): Promise<number> {
-  if (chain === 'solana') return fetchSolanaBondingThreshold()
+  if (isSolanaChain(chain)) return fetchSolanaBondingThreshold()
   if (chainId) return fetchEVMBondingLimit(chainId)
   return bondingLimits[11155111] ?? 2
 }

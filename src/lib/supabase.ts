@@ -1,5 +1,6 @@
 import { createClient } from '@supabase/supabase-js'
 import { PublicKey } from '@solana/web3.js'
+import { defaultEvmChainSlug } from './chainUtils'
 
 // RealtimeChannel type - inferred from Supabase client channel method
 type RealtimeChannel = ReturnType<ReturnType<typeof createClient>['channel']>
@@ -110,6 +111,9 @@ export interface BondingCurve {
   total_sellers: number
   lp_created: boolean
   liquidity_token_id: string | null
+  liquidity_lock_duration_seconds?: string | null
+  liquidity_unlock_timestamp?: number | null
+  lp_unlocked?: boolean
   start_timestamp: number
   transaction_hash: string
   block_number: number
@@ -520,7 +524,7 @@ export async function fetchTokenByAddress(tokenAddress: string, chain?: string):
     .from('tokens')
     .select('*')
     .eq('token_address', normalizedAddress)
-    .eq('chain', chain || 'evm')
+    .eq('chain', chain || defaultEvmChainSlug())
     .single()
     // let query = supabase
     //   .from('tokens')

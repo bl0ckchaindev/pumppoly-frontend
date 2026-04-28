@@ -11,6 +11,7 @@ import apiService from '../../lib/api'
 import { useChain } from '../../lib/context/ChainContext'
 import { useSupabase } from '../../lib/constants'
 import { calculateTokenPriceUSD, calculateSolanaTokenPriceUSD, formatTokenPriceDisplay } from '../../lib/tokenCalculations'
+import { isSolanaChain, defaultEvmChainSlug } from '../../lib/chainUtils'
 
 interface TokenHolding {
   tokenAddress: string
@@ -636,11 +637,11 @@ const Profile = () => {
                       {token.name} ${token.symbol}
                     </div>
                     <div className="text-sm text-text-tertiary md:text-xs sm:text-xs">
-                      {token.chain === 'solana' ? 'Solana' : 'EVM'}
+                      {isSolanaChain(token.chain) ? 'Solana' : String(token.chain || defaultEvmChainSlug()).toUpperCase()}
                     </div>
                     {token.bondingCurve?.current_price != null && Number(token.bondingCurve.current_price) > 0 && (() => {
                       const tokenPriceRaw = Number(token.bondingCurve.current_price)
-                      const priceUSDStr = token.chain === 'solana'
+                      const priceUSDStr = isSolanaChain(token.chain)
                         ? calculateSolanaTokenPriceUSD(tokenPriceRaw, solPrice)
                         : calculateTokenPriceUSD(tokenPriceRaw, ethPrice)
                       return (

@@ -42,6 +42,7 @@ import { useEthPrice } from '../lib/hooks/useEthPrice'
 import { useSolPrice } from '../lib/hooks/useSolPrice'
 import { useChain } from '../lib/context/ChainContext'
 import { formatMarketCap } from '../lib/formatting'
+import { isSolanaChain, isEvmCompatibleChain, defaultEvmChainSlug } from '../lib/chainUtils'
 import LoadingSpinner from '../components/common/LoadingSpinner'
 import { fetchTokenPriceData, subscribeToPriceUpdates, fetchBondingCurve } from '../lib/supabase'
 import { supabase } from '../lib/supabase'
@@ -233,7 +234,7 @@ const Home = () => {
   useEffect(() => {
     const fetchTokenBalance = async () => {
       // Handle Solana tokens
-      if (currentToken?.chain === 'solana' && currentToken?.tokenAddress && solanaPublicKey && solanaConnected) {
+      if (isSolanaChain(currentToken?.chain) && currentToken?.tokenAddress && solanaPublicKey && solanaConnected) {
         try {
           const connection = new Connection(SOLANA_RPC_URL, 'confirmed')
           const mint = new PublicKey(currentToken.tokenAddress)
@@ -247,7 +248,7 @@ const Home = () => {
         }
       }
       // Handle EVM tokens: use connected chain so we read from the wallet's network (balance shows in buy/sell modal)
-      else if (currentToken?.chain === 'evm' && currentToken?.tokenAddress && address && isConnected) {
+      else if (isEvmCompatibleChain(currentToken?.chain) && currentToken?.tokenAddress && address && isConnected) {
         const effectiveChainId = Number(connectedChainId) || currentToken.chainId
         if (effectiveChainId && web3Clients[effectiveChainId]) {
           try {
@@ -278,7 +279,7 @@ const Home = () => {
   // Fetch token allowance for current token (EVM: use connected chain so modal has correct allowance)
   useEffect(() => {
     const fetchTokenAllowance = async () => {
-      if (currentToken?.chain !== 'evm') {
+      if (!isEvmCompatibleChain(currentToken?.chain)) {
         setTokenAllowance(0)
         return
       }
@@ -338,18 +339,18 @@ const Home = () => {
     // console.log('[god-log] bondingCurveAddress', token?.bondingCurveAddress)
     if (!token?.bondingCurveAddress || !updateTokenByBondingCurve) return
     const bondingCurveAddress = token.bondingCurveAddress
-    const chain = token.chain === 'solana' ? 'solana' : 'evm'
-    const chainId = token.chain === 'evm' && token.chainId ? Number(token.chainId) : undefined
+    const chain = isSolanaChain(token.chain) ? 'solana' : (token.chain || defaultEvmChainSlug())
+    const chainId = isEvmCompatibleChain(token.chain) && token.chainId ? Number(token.chainId) : undefined
     const limit = await fetchBondingLimitFromContract(chain, chainId)
     // console.log('[god-log] limit', limit)
     // console.log('[god-log] bondingLimits', bondingLimits)
 
-    const bondingThreshold = (limit != null && limit > 0) ? limit : (token.chain === 'solana' ? (bondingLimits['solana'] ?? SOLANA_BONDING_LIMIT_SOL) : (bondingLimits[token.chainId as number] || 0.1))
-    const basePrice = token.chain === 'solana' ? (solPrice || 0) : (ethPrice || 0)
+    const bondingThreshold = (limit != null && limit > 0) ? limit : (isSolanaChain(token.chain) ? (bondingLimits['solana'] ?? SOLANA_BONDING_LIMIT_SOL) : (bondingLimits[token.chainId as number] || 0.1))
+    const basePrice = isSolanaChain(token.chain) ? (solPrice || 0) : (ethPrice || 0)
     // console.log('[god-log] bondingThreshold', bondingThreshold)
     // console.log('[god-log] basePrice', basePrice)
     try {
-      if (token.chain === 'evm' && token.chainId) {
+      if (isEvmCompatibleChain(token.chain) && token.chainId) {
         const chainIdNum = Number(token.chainId)
         const client = getEvmPublicClient(chainIdNum)
         const addr = getAddress(bondingCurveAddress)
@@ -371,7 +372,7 @@ const Home = () => {
           lpCreated: prev?.lpCreated || lpCreated // Sticky: once true, never false
         }))
         updateTokenByBondingCurve(bondingCurveAddress, { progress, depositedAmount, lpCreated, tokenPrice, marketCap, priceUSD })
-      } else if (token.chain === 'solana' && token.tokenAddress) {
+      } else if (isSolanaChain(token.chain) && token.tokenAddress) {
         let bc = getCachedBondingCurve(token.tokenAddress)
         if (!bc) {
           const programInstance = new SolanaProgram(solanaWallet)
@@ -415,17 +416,17 @@ const Home = () => {
 
   // Callback to handle successful swap — close modal, refetch list, refresh balances so next open shows correct balance
   const handleSwapSuccess = () => {
-    if (currentToken?.chain === 'solana' && currentToken?.tokenAddress) {
+    if (isSolanaChain(currentToken?.chain) && currentToken?.tokenAddress) {
       invalidateBondingCurve(currentToken.tokenAddress)
       refetchSolanaBalance()
-    } else if (currentToken?.chain === 'evm') {
+    } else if (isEvmCompatibleChain(currentToken?.chain)) {
       refetchBalance()
     }
     setShowSwapModal(false)
     refetchTokens()
     refetchCurrentTokenBondingFromChain()
     // EVM: RPC may lag — retry refetch at 1.5s and 3.5s for faster token list updates
-    if (currentToken?.chain === 'evm') {
+    if (isEvmCompatibleChain(currentToken?.chain)) {
       setTimeout(() => refetchCurrentTokenBondingFromChain(), 1500)
       setTimeout(() => refetchCurrentTokenBondingFromChain(), 3500)
     }
@@ -545,7 +546,7 @@ const Home = () => {
           if (index !== currentTokenIndex) return null
 
           // For Solana tokens, don't lowercase the address in logo URL
-          const isSolana = token.chain === 'solana'
+          const isSolana = isSolanaChain(token.chain)
           const logoAddress = isSolana ? (token.tokenAddress || '') : (token.tokenAddress || '').toLowerCase()
           const tokenLogoUrl = imageUploadUrl + 'tokens/' + logoAddress + '-logo.png'
           const priceData = tokenPriceDatas[token.tokenAddress] || []
@@ -585,7 +586,7 @@ const Home = () => {
                 website: token.website || null,
                 bondingCurveAddress: token.bondingCurveAddress,
                 effectiveChainId: token.chainId?.toString() || undefined,
-                chain: token.chain || 'evm',
+                chain: token.chain || defaultEvmChainSlug(),
                 tokenPrice: displayTokenPrice,
                 marketCap: displayMarketCap,
                 volume: displayVolume,
@@ -643,7 +644,9 @@ const Home = () => {
                   chartType="candlestick"
                   showControls={true}
                   isMobile={isMobile}
-                  chain={isSolana ? 'solana' : 'evm'}
+                  chain={isSolana ? 'solana' : (token.chain || defaultEvmChainSlug())}
+                  chartSymbol={token.tokenSymbol || 'TOKEN'}
+                  chartDescription={token.tokenName || ''}
                   onClick={() => {}}
                 />
               </div>
@@ -1024,13 +1027,13 @@ const Home = () => {
             {/* SwapCard in Modal */}
             <SwapCard
               tokenSymbol={currentToken.tokenSymbol}
-              tokenLogo={imageUploadUrl + 'tokens/' + (currentToken.chain === 'solana' ? currentToken.tokenAddress : (currentToken.tokenAddress || '').toLowerCase()) + '-logo.png'}
+              tokenLogo={imageUploadUrl + 'tokens/' + (isSolanaChain(currentToken.chain) ? currentToken.tokenAddress : (currentToken.tokenAddress || '').toLowerCase()) + '-logo.png'}
                 tokenAddress={currentToken.tokenAddress}
                 bondingCurveAddress={currentToken.bondingCurveAddress}
-                effectiveChainId={currentToken.chain === 'evm' ? (connectedChainId?.toString() || currentToken.chainId?.toString() || '') : (currentToken.chainId?.toString() || '')}
-                chain={currentToken.chain || 'evm'}
+                effectiveChainId={isEvmCompatibleChain(currentToken.chain) ? (connectedChainId?.toString() || currentToken.chainId?.toString() || '') : (currentToken.chainId?.toString() || '')}
+                chain={currentToken.chain || defaultEvmChainSlug()}
                 lpCreated={currentToken.lpCreated || false}
-                accountBalance={currentToken.chain === 'solana' ? solanaAccountBalance : accountBalance}
+                accountBalance={isSolanaChain(currentToken.chain) ? solanaAccountBalance : accountBalance}
                 tokenBalance={tokenBalance}
                 tokenAllowance={tokenAllowance}
                 setTokenAllowance={setTokenAllowance}

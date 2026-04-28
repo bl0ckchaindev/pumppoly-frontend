@@ -23,7 +23,8 @@ function getToastErrorMessage(err) {
   }
   return 'Transaction failed'
 }
-import { web3Clients, coinNames, SOLANA_CHAIN, SOLANA_PROGRAM_ID, SOLANA_RPC_URL } from '../../lib/constants.ts'
+import { web3Clients, coinNames, SOLANA_PROGRAM_ID, SOLANA_RPC_URL } from '../../lib/constants.ts'
+import { defaultEvmChainSlug, isSolanaChain } from '../../lib/chainUtils'
 import { apiService } from '../../lib/api.ts'
 import { getRouterAddress } from '../../lib/addressHelpers.ts'
 import { config } from '../../lib/config.jsx'
@@ -62,7 +63,7 @@ const SwapCard = ({
   tokenAddress,
   bondingCurveAddress,
   effectiveChainId,
-  chain = 'evm',
+  chain = defaultEvmChainSlug(),
   lpCreated,
   accountBalance,
   tokenBalance,
@@ -77,7 +78,7 @@ const SwapCard = ({
   const { address, isConnected, chainId: connectedChainId } = useAccount()
   const { publicKey: solanaPublicKey, connected: solanaConnected, signTransaction } = useWallet()
   const { setVisible: setSolanaModalVisible } = useWalletModal()
-  const isSolana = chain === SOLANA_CHAIN
+  const isSolana = isSolanaChain(chain)
   const baseCurrency = isSolana ? 'SOL' : 'ETH'
   const nativeCurrencyLabel = isSolana ? 'SOL' : (coinNames[Number(effectiveChainId)] || 'ETH')
   // Initialize inputToken based on initialMode: 'buy' = 'ETH'/'SOL', 'sell' = 'Token'

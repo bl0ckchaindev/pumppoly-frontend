@@ -35,12 +35,17 @@ const SwapCard = dynamic(
   () => import('../../../components/token/SwapCard.jsx'),
   { loading: () => <div className="min-h-[180px] flex items-center justify-center"><div className="w-6 h-6 border-2 border-purple-primary/50 border-t-purple-primary rounded-full animate-spin" /></div>, ssr: false }
 )
+const LiquidityLockCard = dynamic(
+  () => import('../../../components/token/LiquidityLockCard'),
+  { loading: () => null, ssr: false }
+)
 import rot13 from '../../../lib/encode'
 import Cookies from 'universal-cookie'
 import { web3Clients, imageUrl, apiUrl, scanLinks, TOKEN_TOTAL_SUPPLY, initialEth, bondingLimits, useSupabase } from '../../../lib/constants'
 import { fetchBondingLimitFromContract } from '../../../lib/bondingConfig'
 import { calculateTokenPriceUSD, calculateMarketCap, calculateVolumeUSD } from '../../../lib/tokenCalculations'
 import { formatMarketCap } from '../../../lib/formatting'
+import { isSolanaChain, isEvmCompatibleChain, defaultEvmChainSlug } from '../../../lib/chainUtils'
 import { getRouterAddress, getDefaultAddress } from '../../../lib/addressHelpers'
 import { config } from '../../../lib/config.jsx'
 import ChadAbi from '../../../lib/abis/BondingCurveABI.json'
@@ -116,7 +121,9 @@ const Token = () => {
   const chainParam = searchParams?.get('chain')
   const chainId = searchParams?.get('chainId')
   // Infer chain from URL param or from token address when missing (fix: Solana token links must preserve chain)
-  const tokenChain: string = chainParam === 'solana' ? 'solana' : (chainParam === 'evm' ? 'evm' : (tokenAddressFromPath && isSolanaAddress(tokenAddressFromPath) ? 'solana' : 'evm'))
+  const tokenChain: string = chainParam
+    ? chainParam.toLowerCase()
+    : (tokenAddressFromPath && isSolanaAddress(tokenAddressFromPath) ? 'solana' : defaultEvmChainSlug())
   const { address, isConnected, chainId: connectedChainId } = useAccount()
   const solanaWallet = useWallet()
   const solanaPublicKey = solanaWallet.publicKey
@@ -196,9 +203,8 @@ const Token = () => {
   useEffect(() => {
     let cancelled = false
     const load = async () => {
-      const chain = tokenChain === 'solana' ? 'solana' : 'evm'
-      const chainId = tokenChain === 'evm' && effectiveChainId ? Number(effectiveChainId) : undefined
-      const limit = await fetchBondingLimitFromContract(chain, chainId)
+      const chainId = isEvmCompatibleChain(tokenChain) && effectiveChainId ? Number(effectiveChainId) : undefined
+      const limit = await fetchBondingLimitFromContract(tokenChain, chainId)
       if (!cancelled) setBondingLimitFromContract(limit)
     }
     if (tokenChain) load()
@@ -208,7 +214,7 @@ const Token = () => {
   // Refetch bonding curve state from chain after swap (buy/sell) so progress shows current state, not one-tx-behind
   const refetchBondingCurveFromChain = useCallback(async () => {
     if (!bondingCurveAddress || !tokenAddress) return
-    if (tokenChain === 'evm' && effectiveChainId) {
+    if (isEvmCompatibleChain(tokenChain) && effectiveChainId) {
       try {
         const chainIdNum = Number(effectiveChainId)
         const client = getEvmPublicClient(chainIdNum)
@@ -232,7 +238,7 @@ const Token = () => {
       } catch (e) {
         console.error('Refetch bonding curve from chain (EVM):', e)
       }
-    } else if (tokenChain === 'solana' && tokenAddress) {
+    } else if (isSolanaChain(tokenChain) && tokenAddress) {
       try {
         const { SolanaProgram } = await import('../../../lib/solana/program')
         const programInstance = new SolanaProgram(solanaWallet as any)
@@ -280,10 +286,10 @@ const Token = () => {
         lpCreated: realtimeBondingCurve.lp_created
       })
 
-      const basePrice = tokenChain === 'solana' ? (solPrice || 0) : localEthPrice
+      const basePrice = isSolanaChain(tokenChain) ? (solPrice || 0) : localEthPrice
       if (realtimeBondingCurve.volume && basePrice > 0) {
         const volumeRaw = Number(realtimeBondingCurve.volume)
-        const volumeUSD = tokenChain === 'solana'
+        const volumeUSD = isSolanaChain(tokenChain)
           ? (volumeRaw / 1e9) * basePrice
           : calculateVolumeUSD(volumeRaw, basePrice)
         setTokenSupplyUSD(volumeUSD)
@@ -293,7 +299,7 @@ const Token = () => {
         const tokenPriceRaw = Number(realtimeBondingCurve.current_price)
         if (tokenPriceRaw > 0) {
           setTokenPrice(tokenPriceRaw)
-          const priceForMc = tokenChain === 'solana' ? (solPrice || 0) : localEthPrice
+          const priceForMc = isSolanaChain(tokenChain) ? (solPrice || 0) : localEthPrice
           if (priceForMc > 0 && tokenPriceRaw > 0) {
             setMarketCap(calculateMarketCap(tokenPriceRaw, priceForMc))
           }
@@ -825,7 +831,7 @@ const Token = () => {
         // Progress & lpCreated: always from chain when possible so UI is never one-tx behind
         let progressFromChain: { progress: number; lpCreated: boolean } | null = null
         try {
-          if (tokenChain === 'evm' && effectiveChainId && bondingCurveAddress) {
+          if (isEvmCompatibleChain(tokenChain) && effectiveChainId && bondingCurveAddress) {
             const chainIdNum = Number(effectiveChainId)
             const client = getEvmPublicClient(chainIdNum)
             const addr = getAddress(bondingCurveAddress)
@@ -836,7 +842,7 @@ const Token = () => {
             const limit = bondingLimitFromContract ?? (bondingLimits[Number(effectiveChainId)] || 0.1)
             const realLpNative = (typeof realEthLpVal === 'bigint' ? Number(realEthLpVal) : Number(realEthLpVal)) / 1e18
             progressFromChain = { progress: lpCreatedVal ? 100 : Math.min((realLpNative / limit) * 100, 100), lpCreated: !!lpCreatedVal }
-          } else if (tokenChain === 'solana' && tokenAddress && bondingCurveAddress) {
+          } else if (isSolanaChain(tokenChain) && tokenAddress && bondingCurveAddress) {
             const { SolanaProgram } = await import('../../../lib/solana/program')
             const programInstance = new SolanaProgram(solanaWallet as any)
             const bc = await programInstance.getBondingCurve(tokenAddress)
@@ -853,11 +859,11 @@ const Token = () => {
           setProgress(progressFromChain.progress)
           setLpCreated(prev => prev || progressFromChain!.lpCreated) // Sticky: once true, never false
         } else {
-          const bondingLimit = bondingLimitFromContract ?? (tokenChain === 'solana' ? (bondingLimits['solana'] ?? 2) : (bondingLimits[Number(effectiveChainId)] || 0.1))
+          const bondingLimit = bondingLimitFromContract ?? (isSolanaChain(tokenChain) ? (bondingLimits['solana'] ?? 2) : (bondingLimits[Number(effectiveChainId)] || 0.1))
           let progressValue = 0
           if (isLpCreated) progressValue = 100
           else {
-            const realLpNative = tokenChain === 'solana' ? realEthLp / 1e9 : realEthLp / 10 ** 18
+            const realLpNative = isSolanaChain(tokenChain) ? realEthLp / 1e9 : realEthLp / 10 ** 18
             if (bondingLimit > 0) progressValue = Math.min((realLpNative / bondingLimit) * 100, 100)
           }
           setProgress(progressValue)
@@ -866,14 +872,14 @@ const Token = () => {
 
         // Use utility functions for accurate calculations (use SOL price for Solana)
         const tokenPriceWei = tokenPrice || 0
-        const basePriceForMc = tokenChain === 'solana' ? (solPrice || 0) : localEthPrice
+        const basePriceForMc = isSolanaChain(tokenChain) ? (solPrice || 0) : localEthPrice
         if (tokenPriceWei > 0 && basePriceForMc > 0) {
           const marketCapValue = calculateMarketCap(tokenPriceWei, basePriceForMc)
           setMarketCap(marketCapValue)
         }
 
-        const basePriceForVol = tokenChain === 'solana' ? (solPrice || 0) : localEthPrice
-        const volumeUSD = tokenChain === 'solana' && volumeWei > 0 && basePriceForVol > 0
+        const basePriceForVol = isSolanaChain(tokenChain) ? (solPrice || 0) : localEthPrice
+        const volumeUSD = isSolanaChain(tokenChain) && volumeWei > 0 && basePriceForVol > 0
           ? (volumeWei / 1e9) * basePriceForVol
           : calculateVolumeUSD(volumeWei, basePriceForVol)
         setTokenSupplyUSD(volumeUSD)
@@ -881,7 +887,7 @@ const Token = () => {
         // Balance/allowance:
         // - EVM: ERC20 balance + allowance
         // - Solana: SOL balance + SPL token ATA balance (no allowance concept)
-        if (tokenChain === 'solana') {
+        if (isSolanaChain(tokenChain)) {
           try {
             if (solanaPublicKey) {
               const { Connection, PublicKey } = await import('@solana/web3.js')
@@ -946,7 +952,7 @@ const Token = () => {
 
     // Only poll contract data (not Supabase data - that comes from real-time subscriptions)
     // Poll less frequently if using Supabase real-time for bonding curve updates
-    if (bondingCurveAddress && (effectiveChainId || tokenChain === 'solana') && !loadingBondingCurve) {
+    if (bondingCurveAddress && (effectiveChainId || isSolanaChain(tokenChain)) && !loadingBondingCurve) {
       FetchData()
       // If using Supabase real-time, only poll contract data every 60s (for token name, symbol, etc.)
       // Bonding curve price/volume updates come from real-time subscription
@@ -1045,7 +1051,9 @@ const Token = () => {
       const token = allTokens[index]
       const targetAddress = token.tokenAddress || token.bondingCurveAddress
       if (targetAddress) {
-        const chainQ = token.chain === 'solana' ? '?chain=solana' : ''
+        const chainQ = isSolanaChain(token.chain)
+          ? '?chain=solana'
+          : (token.chain ? `?chain=${encodeURIComponent(token.chain)}` : '')
         router.push(`/token/${targetAddress}${chainQ}`)
         setCurrentTokenIndex(index)
         window.scrollTo(0, 0)
@@ -1248,7 +1256,7 @@ const Token = () => {
                         <TrendingCard
                           key={tokenKey}
                           token={token}
-                          link={`/token/${token.tokenAddress}${token.chain === 'solana' ? '?chain=solana' : ''}`}
+                          link={`/token/${token.tokenAddress}${isSolanaChain(token.chain) ? '?chain=solana' : (token.chain ? `?chain=${encodeURIComponent(token.chain)}` : '')}`}
                         />
                       )
                     })}
@@ -1288,7 +1296,7 @@ const Token = () => {
                     >
                       {React.createElement(LaunchpadCard as any, {
                         chainId: token.chainId || undefined,
-                        chain: token.chain || 'evm',
+                        chain: token.chain || defaultEvmChainSlug(),
                         progress: token.progress,
                         bondingThreshold: token.bondingThreshold,
                         tokenName: token.tokenName,
@@ -1347,9 +1355,28 @@ const Token = () => {
               volume: tokenSupplyUSD,
               progress: progress,
               bondingThreshold: bondingLimitFromContract ?? undefined,
-              ethPrice: tokenChain === 'solana' ? (solPrice || 0) : (ethPrice || localEthPrice),
+              ethPrice: isSolanaChain(tokenChain) ? (solPrice || 0) : (ethPrice || localEthPrice),
               priceChange24h: priceChange24h !== null ? priceChange24h : undefined,
               simplified: true
+            })}
+
+            {React.createElement(LiquidityLockCard as any, {
+              chain: tokenChain,
+              bondingCurveAddress: bondingCurveAddress || null,
+              tokenMintAddress: tokenAddressFromPath || tokenAddress || null,
+              effectiveChainId,
+              lpCreated: Boolean(lpCreated),
+              backendLockSeconds:
+                bondingCurveDataFromBackend?.liquidity_lock_duration_seconds ??
+                bondingCurveDataFromBackend?.liquidityLockDurationSeconds ??
+                null,
+              backendUnlockTs:
+                bondingCurveDataFromBackend?.liquidity_unlock_timestamp ??
+                bondingCurveDataFromBackend?.liquidityUnlockTimestamp ??
+                null,
+              backendLpUnlocked: Boolean(
+                bondingCurveDataFromBackend?.lp_unlocked ?? bondingCurveDataFromBackend?.lpUnlocked
+              )
             })}
 
             {/* Price Chart */}
@@ -1394,13 +1421,15 @@ const Token = () => {
 
               {React.createElement(TradingViewChart as any, {
                 tokenPrice: tokenPrice,
-                ethPrice: tokenChain === 'solana' ? solPrice : ethPrice,
+                ethPrice: isSolanaChain(tokenChain) ? solPrice : ethPrice,
                 tokenPriceDatas: tokenPriceDatas || [],
                 chartType: "candlestick",
                 showControls: true,
                 isMobile: isMobile,
                 defaultExpanded: true,
-                chain: tokenChain === 'solana' ? 'solana' : 'evm'
+                chain: isSolanaChain(tokenChain) ? 'solana' : tokenChain,
+                chartSymbol: tokenSymbol || 'TOKEN',
+                chartDescription: tokenName || ''
               })}
             </div>
 
@@ -1422,9 +1451,9 @@ const Token = () => {
                 tokenAddress={tokenAddress || ''}
                 bondingCurveAddress={bondingCurveAddress || ''}
                 effectiveChainId={effectiveChainId}
-                chain={(tokenChain || 'evm') as string}
+                chain={(tokenChain || defaultEvmChainSlug()) as string}
                 lpCreated={lpCreated}
-                accountBalance={tokenChain === 'solana' ? solanaAccountBalance : accountBalance}
+                accountBalance={isSolanaChain(tokenChain) ? solanaAccountBalance : accountBalance}
                 tokenBalance={tokenBalance}
                 tokenAllowance={tokenAllowance}
                 setTokenAllowance={setTokenAllowance}
@@ -1435,7 +1464,7 @@ const Token = () => {
                   refetchBondingCurveFromChain()
                   setTradeHistoryRefreshKey(k => k + 1)
                   // EVM: RPC nodes may lag — retry refetch at 1.5s and 3.5s to catch propagation (Solana is faster)
-                  if (tokenChain === 'evm') {
+                  if (isEvmCompatibleChain(tokenChain)) {
                     setTimeout(() => refetchBondingCurveFromChain(), 1500)
                     setTimeout(() => refetchBondingCurveFromChain(), 3500)
                   }
@@ -1462,7 +1491,7 @@ const Token = () => {
                 chain={tokenChain}
                 contractAddress={bondingCurveAddress}
                 tokenPriceDatas={tokenPriceDatas || []}
-                ethPrice={tokenChain === 'solana' ? (solPrice || 0) : (ethPrice || localEthPrice)}
+                ethPrice={isSolanaChain(tokenChain) ? (solPrice || 0) : (ethPrice || localEthPrice)}
                 tokenSymbol={tokenSymbol}
                 simplified={true}
                 maxRows={5}
@@ -1526,7 +1555,7 @@ const Token = () => {
                   chain={tokenChain}
                   contractAddress={bondingCurveAddress}
                   tokenPriceDatas={tokenPriceDatas || []}
-                  ethPrice={tokenChain === 'solana' ? (solPrice || 0) : (ethPrice || localEthPrice)}
+                  ethPrice={isSolanaChain(tokenChain) ? (solPrice || 0) : (ethPrice || localEthPrice)}
                   tokenSymbol={tokenSymbol}
                   maxRows={undefined}
                   onViewAll={undefined}
@@ -1628,12 +1657,14 @@ const Token = () => {
             }}>
               {React.createElement(TradingViewChart as any, {
                 tokenPrice: tokenPrice,
-                ethPrice: tokenChain === 'solana' ? solPrice : ethPrice,
+                ethPrice: isSolanaChain(tokenChain) ? solPrice : ethPrice,
                 tokenPriceDatas: (tokenPriceDatas || []) as any[],
                 chartType: "line",
                 showControls: true,
                 onClick: () => { },
-                chain: tokenChain === 'solana' ? 'solana' : 'evm'
+                chain: isSolanaChain(tokenChain) ? 'solana' : tokenChain,
+                chartSymbol: tokenSymbol || 'TOKEN',
+                chartDescription: tokenName || ''
               })}
             </div>
           </div>

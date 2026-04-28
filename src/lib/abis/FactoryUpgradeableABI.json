@@ -219,6 +219,12 @@
         "internalType": "uint256",
         "name": "blockNumber",
         "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "liquidityLockDuration",
+        "type": "uint256"
       }
     ],
     "name": "TokenCreated",
@@ -370,6 +376,11 @@
         "internalType": "string[]",
         "name": "tokenDatas",
         "type": "string[]"
+      },
+      {
+        "internalType": "uint256",
+        "name": "liquidityLockDuration",
+        "type": "uint256"
       }
     ],
     "name": "createToken",

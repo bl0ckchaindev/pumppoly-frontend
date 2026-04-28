@@ -3,7 +3,8 @@
  */
 
 import { useState, useEffect, useRef, useCallback } from 'react'
-import { CHAIN_ID, imageUrl, bondingLimits, SOLANA_BONDING_LIMIT_SOL, SOLANA_CHAIN } from '../constants'
+import { CHAIN_ID, imageUrl, bondingLimits, SOLANA_BONDING_LIMIT_SOL } from '../constants'
+import { defaultEvmChainSlug, isSolanaChain } from '../chainUtils'
 import { calculateMarketCap, calculateTokenPriceUSD, calculateSolanaMarketCap, calculateSolanaTokenPriceUSD } from '../tokenCalculations'
 import { fetchAllTokensWithBondingCurves, subscribeToBondingCurve, supabase } from '../supabase'
 import { fetchBondingLimitFromContract } from '../bondingConfig'
@@ -129,8 +130,8 @@ export const useAllTokens = (ethPrice: number, solPrice?: number, activeChain?: 
             const name = token.name || ''
             const symbol = token.symbol || ''
             const description = token.description || ''
-            const chain = token.chain || 'evm' // Get chain from token data
-            const isSolana = chain === SOLANA_CHAIN
+            const chain = token.chain || defaultEvmChainSlug()
+            const isSolana = isSolanaChain(chain)
             
             // Filter by active chain if specified
             const currentActiveChain = activeChainRef.current
@@ -251,7 +252,7 @@ export const useAllTokens = (ethPrice: number, solPrice?: number, activeChain?: 
                         const volume = Number(updatedBondingCurve.volume) || 0
                         // Sticky: once true, never false (LP creation is irreversible; prevents trading re-enable during update cycles)
                         const lpCreated = t.lpCreated || !!(updatedBondingCurve.lp_created)
-                        const isSolana = t.chain === SOLANA_CHAIN
+                        const isSolana = isSolanaChain(t.chain)
 
                         // Use token's contract-derived threshold when available
                         const bondingLimit = (t.bondingThreshold != null && t.bondingThreshold > 0)
